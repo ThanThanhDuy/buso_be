@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//modify Database Scheme
+model User {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  hashedPassword String
+  userName       String
+  fullName       String
+  avatarUrl      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  //relationship
+  notes          Post[]
+
+  @@map("user") //users id "table's name" in Postgres SQL
+}
+
+//One user can "write" Many notes
+model Post {
+  id        Int      @id @default(autoincrement())
+  content   String
+  // other fields ...
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //relationship
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Image     Image[]
+
+  @@map("post")
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  // other fields ...
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //relationship
+  Post      Post?    @relation(fields: [postId], references: [id])
+  postId    Int?
+
+  @@map("image")
+}
